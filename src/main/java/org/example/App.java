@@ -29,8 +29,14 @@ public class App
             command = in.nextLine();
             if (command.equals("#read")){
                 manager.printAllTasks();
-            }
-            else if(command.equals("#write")){
+            } else if (command.equals("#find")) {
+                System.out.println("Введите дату в формате: " + manager.dateFormat);
+                String st = in.nextLine();
+                while (!manager.findAllOnDate(st)){
+                    System.out.println("Неверный формат даты, попробуйте еще.");
+                    st = in.nextLine();
+                }
+            } else if(command.equals("#write")){
                 System.out.println("Введите ваши планы на сегодня:");
                 manager.saveNewTask(in.nextLine());
             }
@@ -43,6 +49,7 @@ public class App
                 System.out.println("#read");
                 System.out.println("#statistics");
                 System.out.println("#write");
+                System.out.println("#find");
                 System.out.println("#exit");
             }
         }
