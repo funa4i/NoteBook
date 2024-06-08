@@ -4,35 +4,36 @@ import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.sql.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class FileWR {
     static final private String alg = "PBKDF2WithHmacSHA256";
     static final private String filePath = "src\\main\\resources\\";
     static SecretKey createNewUserFile(String userName, String password) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
+
         File file = new File(filePath + userName + ".bin");
         SecretKey key = FileWR.getSecretKey(password, userName);
         writeFile(userName, userName, key);
+
         return key;
     }
 
     public static boolean isUserLogging(String userName){
+
         File file = new File(filePath + userName + ".bin");
+
         return file.exists();
     }
 
     static boolean tryRead(String userName, SecretKey secretKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException{
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.DECRYPT_MODE, secretKey);
+
         File file = new File(filePath + userName + ".bin");
+
         if (!file.exists()){
             return false;
         }
@@ -45,6 +46,7 @@ public class FileWR {
             if (b == -1){
                 return false;
             }
+
             baos.write(b);
 
 
@@ -66,8 +68,10 @@ public class FileWR {
     static void writeFile(String userName, String value, SecretKey secretKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+
         try {
             FileOutputStream stream = new FileOutputStream(filePath + userName + ".bin", true);
+
             byte[] data = value.getBytes();
             byte[] plainText = cipher.doFinal(data);
 
@@ -84,14 +88,17 @@ public class FileWR {
     static String getNextString(FileInputStream fileInputStream, SecretKey secretKey){
 
         try {
+
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
+
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
             byte b = (byte)fileInputStream.read();
             if (b == -1){
                 return null;
             }
+
             baos.write(b);
 
             while (b != " ".getBytes()[0]){
@@ -119,6 +126,7 @@ public class FileWR {
     public static SecretKey getSecretKey(String password, String salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
             SecretKeyFactory factory = SecretKeyFactory.getInstance(alg);
             KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), 65536, 256);
+
             return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
     }
 }

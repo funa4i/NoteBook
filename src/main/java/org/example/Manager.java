@@ -2,18 +2,17 @@ package org.example;
 
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import java.io.File;
 import java.io.FileInputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Scanner;
 
 public class Manager {
     final private String userName;
@@ -23,18 +22,23 @@ public class Manager {
 
     public Manager (String userName) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
         Scanner in = new Scanner(System.in);
+
         if (FileWR.isUserLogging(userName)){
             System.out.print("Введите ваш пароль: ");
+
             secretKey = FileWR.getSecretKey(in.nextLine(), userName);
+
             while (!FileWR.tryRead(userName, secretKey)){
                 System.out.println("Пароль не верный, попробуйте еще раз ");
                 secretKey = FileWR.getSecretKey(in.nextLine(), userName);
             }
+
         }
         else {
             System.out.print("Придумайте пароль: ");
             secretKey = FileWR.createNewUserFile(userName, in.nextLine());
         }
+
         System.out.println("Добро пожаловать, " + userName +"!");
         this.userName = userName;
     }
@@ -49,16 +53,21 @@ public class Manager {
 
 
     public void printAllTasks(){
+
         FileInputStream fileInputStream = FileWR.getNewStreamForUser(userName);
+
         if (fileInputStream == null){
             System.out.println("Записей нет");
         }
+
         String bf = FileWR.getNextString(fileInputStream, secretKey);
         System.out.println("----------------------------");
+
         while (bf != null){
             System.out.println(bf);
             bf = FileWR.getNextString(fileInputStream, secretKey);
         }
+
         System.out.println("----------------------------");
     }
     public boolean findAllOnDate(String val){
