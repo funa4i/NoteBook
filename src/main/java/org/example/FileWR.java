@@ -56,7 +56,7 @@ public class FileWR {
             byte[] plainText = fileInputStream.readNBytes( Integer.parseInt(baos.toString().strip()) * 16);
             byte[] data  = cipher.doFinal(plainText);
 
-            return (new String(data, StandardCharsets.UTF_8)).equals(userName);
+            return (new String(data)).equals(userName);
         }
         catch (IOException | IllegalBlockSizeException | BadPaddingException e){
             return false;
@@ -68,7 +68,7 @@ public class FileWR {
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
         try {
             FileOutputStream stream = new FileOutputStream(filePath + userName + ".bin", true);
-            byte[] data = value.getBytes(StandardCharsets.UTF_8);
+            byte[] data = value.getBytes();
             byte[] plainText = cipher.doFinal(data);
 
             stream.write(Integer.valueOf(plainText.length / 16).toString().getBytes());
@@ -101,7 +101,7 @@ public class FileWR {
 
             byte[] plainText = fileInputStream.readNBytes(Integer.parseInt(baos.toString().strip()) * 16);
             byte[] data =  cipher.doFinal(plainText);
-            return new String(data, StandardCharsets.UTF_8);
+            return new String(data);
         }
         catch (Exception e){
             return null;

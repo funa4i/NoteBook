@@ -24,7 +24,7 @@ public class Manager {
     public Manager (String userName) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
         Scanner in = new Scanner(System.in);
         if (FileWR.isUserLogging(userName)){
-            System.out.println("Введите ваш пароль пароль ");
+            System.out.print("Введите ваш пароль: ");
             secretKey = FileWR.getSecretKey(in.nextLine(), userName);
             while (!FileWR.tryRead(userName, secretKey)){
                 System.out.println("Пароль не верный, попробуйте еще раз ");

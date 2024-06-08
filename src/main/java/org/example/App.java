@@ -21,7 +21,7 @@ public class App
             NoSuchPaddingException, InvalidKeyException {
         Scanner in = new Scanner(System.in);
         System.out.println("Записная книжка");
-        System.out.println("Пожалуйста, введите ваш логин: ");
+        System.out.print("Пожалуйста, введите ваш логин: ");
         Manager manager = new Manager(in.nextLine());
         String command = "";
         do {
