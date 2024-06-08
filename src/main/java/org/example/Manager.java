@@ -32,7 +32,7 @@ public class Manager {
             }
         }
         else {
-            System.out.println("Придумайте пароль ");
+            System.out.print("Придумайте пароль: ");
             secretKey = FileWR.createNewUserFile(userName, in.nextLine());
         }
         System.out.println("Добро пожаловать, " + userName +"!");
