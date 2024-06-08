@@ -3,16 +3,16 @@ package org.example;
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-import javax.imageio.IIOException;
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.sql.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.*;
+import java.util.List;
 
 public class FileWR {
     static final private String alg = "PBKDF2WithHmacSHA256";
@@ -38,31 +38,81 @@ public class FileWR {
         }
         try {
             FileInputStream fileInputStream = new FileInputStream(file);
-            byte[] data = fileInputStream.readNBytes(16);
-            byte[] plainText = cipher.doFinal(data);
-            return (new String(plainText)).equals(userName);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            byte b = (byte)fileInputStream.read();
+            if (b == -1){
+                return false;
+            }
+            baos.write(b);
+
+
+            while (b != " ".getBytes()[0]){
+                b = (byte)fileInputStream.read();
+                baos.write(b);
+            }
+
+            byte[] plainText = fileInputStream.readNBytes( Integer.parseInt(baos.toString().strip()) * 16);
+            byte[] data  = cipher.doFinal(plainText);
+
+            return (new String(data, StandardCharsets.UTF_8)).equals(userName);
         }
         catch (IOException | IllegalBlockSizeException | BadPaddingException e){
             return false;
         }
     }
 
-    static boolean writeFile(String userName, String value, SecretKey secretKey) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException {
+    static void writeFile(String userName, String value, SecretKey secretKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
         try {
-            FileOutputStream stream = new FileOutputStream(filePath + userName + ".bin", false);
-
+            FileOutputStream stream = new FileOutputStream(filePath + userName + ".bin", true);
             byte[] data = value.getBytes(StandardCharsets.UTF_8);
             byte[] plainText = cipher.doFinal(data);
 
+            stream.write(Integer.valueOf(plainText.length / 16).toString().getBytes());
+            stream.write(" ".getBytes());
             stream.write(plainText);
             stream.flush();
             stream.close();
-            return true;
+
         }
-        catch (IOException | IllegalBlockSizeException | BadPaddingException exception){
-            return false;
+        catch (IOException | IllegalBlockSizeException | BadPaddingException ignored){}
+    }
+
+    static String getNextString(FileInputStream fileInputStream, SecretKey secretKey){
+
+        try {
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            byte b = (byte)fileInputStream.read();
+            if (b == -1){
+                return null;
+            }
+            baos.write(b);
+
+            while (b != " ".getBytes()[0]){
+                b = (byte)fileInputStream.read();
+                baos.write(b);
+            }
+
+            byte[] plainText = fileInputStream.readNBytes(Integer.parseInt(baos.toString().strip()) * 16);
+            byte[] data =  cipher.doFinal(plainText);
+            return new String(data, StandardCharsets.UTF_8);
+        }
+        catch (Exception e){
+            return null;
+        }
+    }
+    static public FileInputStream getNewStreamForUser(String userName){
+        try {
+            return new FileInputStream(filePath + userName + ".bin");
+        }
+        catch (FileNotFoundException exception){
+            return null;
         }
     }
 
